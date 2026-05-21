@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STRIDE — Run Together</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --bg:#07090C;
+    --surface:#0F1318;
+    --surface2:#161B22;
+    --surface3:#1E2430;
+    --border:#232B38;
+    --lime:#C8F135;
+    --lime-dim:#8AAA1F;
+    --coral:#FF5B38;
+    --blue:#3F91FF;
+    --text:#EDF0F4;
+    --muted:#5C6780;
+    --muted2:#8A93A8;
+    --font-display:'Bebas Neue',sans-serif;
+    --font-body:'DM Sans',sans-serif;
+    --font-mono:'Space Mono',monospace;
+  }
+  html{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
+  body{display:flex;height:100vh;overflow:hidden;}
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+  /* SIDEBAR LEFT */
+  .sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;overflow:hidden;}
+  .logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+  .logo-text{font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--lime);}
+  .logo-sub{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:1px;}
+  .nav{padding:12px 10px;flex:1;overflow-y:auto;}
+  .nav-section{margin-bottom:20px;}
+  .nav-label{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;padding:4px 10px 8px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:all 0.15s;color:var(--muted2);font-size:13px;font-weight:500;position:relative;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(200,241,53,0.1);color:var(--lime);}
+  .nav-item .nav-icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .nav-item .badge{margin-left:auto;background:var(--coral);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;}
+  .nav-item.active .nav-icon svg{stroke:var(--lime);}
+  .profile-card{padding:14px;border-top:1px solid var(--border);}
+  .profile-row{display:flex;align-items:center;gap:10px;}
+  .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#C8F135 0%,#3F91FF 100%);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:14px;color:#07090C;flex-shrink:0;}
+  .profile-name{font-size:13px;font-weight:600;color:var(--text);}
+  .profile-level{font-size:11px;color:var(--muted);margin-top:1px;}
+  .xp-bar{margin-top:8px;background:var(--border);border-radius:4px;height:3px;overflow:hidden;}
+  .xp-fill{height:100%;width:68%;background:var(--lime);border-radius:4px;}
+
+  /* MAIN */
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .topbar{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface);}
+  .search-box{flex:1;max-width:360px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;}
+  .search-box input{background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:13px;width:100%;}
+  .search-box input::placeholder{color:var(--muted);}
+  .search-icon svg{width:14px;height:14px;stroke:var(--muted);flex-shrink:0;}
+  .topbar-actions{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .icon-btn{width:36px;height:36px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:0.15s;}
+  .icon-btn:hover{background:var(--surface3);}
+  .icon-btn svg{width:16px;height:16px;stroke:var(--muted2);}
+  .notif-dot{position:relative;}
+  .notif-dot::after{content:'';position:absolute;top:7px;right:7px;width:6px;height:6px;background:var(--coral);border-radius:50%;border:1.5px solid var(--surface);}
+  .live-badge{background:rgba(200,241,53,0.12);border:1px solid rgba(200,241,53,0.25);color:var(--lime);font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;display:flex;align-items:center;gap:5px;}
+  .live-dot{width:6px;height:6px;background:var(--lime);border-radius:50%;animation:pulse 1.5s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+  .content-area{flex:1;display:flex;overflow:hidden;}
+
+  /* FEED COLUMN */
+  .feed-col{flex:1;overflow-y:auto;padding:20px;}
+  .tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;}
+  .tab{flex:1;text-align:center;padding:8px;border-radius:7px;font-size:12px;font-weight:600;letter-spacing:0.5px;cursor:pointer;transition:0.15s;color:var(--muted2);text-transform:uppercase;}
+  .tab.active{background:var(--lime);color:#07090C;}
+  .tab:hover:not(.active){color:var(--text);background:var(--surface2);}
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .section-title{font-family:var(--font-display);font-size:22px;letter-spacing:1px;color:var(--text);}
+  .see-all{font-size:12px;color:var(--lime);cursor:pointer;font-weight:500;}
+
+  /* ACTIVITY CARD */
+  .activity-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;transition:0.2s;cursor:pointer;}
+  .activity-card:hover{border-color:rgba(200,241,53,0.3);background:var(--surface2);}
+  .ac-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .ac-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+  .ac-avatar-placeholder{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:15px;flex-shrink:0;}
+  .ac-name{font-size:13px;font-weight:600;color:var(--text);}
+  .ac-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+  .ac-badge{margin-left:auto;font-size:10px;padding:3px 8px;border-radius:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+  .badge-run{background:rgba(200,241,53,0.12);color:var(--lime);}
+  .badge-trail{background:rgba(63,145,255,0.12);color:var(--blue);}
+  .badge-race{background:rgba(255,91,56,0.12);color:var(--coral);}
+  .ac-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:10px;}
+  .ac-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+  .stat-pill{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;}
+  .stat-val{font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--lime);}
+  .stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+  .map-preview{background:var(--surface3);border-radius:8px;height:80px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;margin-bottom:12px;border:1px solid var(--border);}
+  .map-svg{width:100%;height:100%;}
+  .ac-actions{display:flex;align-items:center;gap:8px;}
+  .action-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-family:var(--font-body);font-size:12px;font-weight:500;cursor:pointer;transition:0.15s;}
+  .action-btn:hover{background:var(--surface2);color:var(--text);}
+  .action-btn.liked{color:var(--coral);border-color:rgba(255,91,56,0.3);}
+  .action-btn svg{width:13px;height:13px;stroke:currentColor;}
+  .action-btn span{margin-left:3px;}
+
+  /* GROUPS */
+  .group-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  .group-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:0.2s;position:relative;overflow:hidden;}
+  .group-card:hover{border-color:rgba(200,241,53,0.3);}
+  .group-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+  .group-card.g1::before{background:var(--lime);}
+  .group-card.g2::before{background:var(--blue);}
+  .group-card.g3::before{background:var(--coral);}
+  .group-card.g4::before{background:#B57BFF;}
+  .group-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;}
+  .group-desc{font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5;}
+  .group-footer{display:flex;align-items:center;justify-content:space-between;}
+  .member-count{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:4px;}
+  .member-count svg{width:12px;height:12px;stroke:var(--muted2);}
+  .join-btn{font-size:11px;font-weight:600;padding:4px 10px;border-radius:5px;border:none;cursor:pointer;transition:0.15s;}
+  .join-btn.join{background:rgba(200,241,53,0.12);color:var(--lime);}
+  .join-btn.join:hover{background:rgba(200,241,53,0.2);}
+  .join-btn.joined{background:var(--surface3);color:var(--muted2);}
+  .next-run{background:rgba(200,241,53,0.08);border:1px solid rgba(200,241,53,0.15);border-radius:6px;padding:6px 8px;margin-top:8px;font-size:10px;color:var(--lime-dim);}
+  .next-run strong{color:var(--lime);}
+
+  /* CHALLENGES */
+  .challenge-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start;cursor:pointer;transition:0.2s;}
+  .challenge-card:hover{border-color:rgba(200,241,53,0.3);}
+  .challenge-icon{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;}
+  .ci-lime{background:rgba(200,241,53,0.12);}
+  .ci-blue{background:rgba(63,145,255,0.12);}
+  .ci-coral{background:rgba(255,91,56,0.12);}
+  .challenge-content{flex:1;}
+  .challenge-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;}
+  .challenge-desc{font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5;}
+  .challenge-progress{margin-bottom:8px;}
+  .progress-bar{background:var(--surface3);border-radius:4px;height:5px;overflow:hidden;margin-top:4px;}
+  .progress-fill{height:100%;border-radius:4px;background:var(--lime);}
+  .progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);}
+  .progress-label span:last-child{color:var(--lime);font-weight:600;}
+  .challenge-meta{display:flex;align-items:center;gap:10px;}
+  .ch-meta-item{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:3px;}
+  .ch-meta-item svg{width:11px;height:11px;stroke:var(--muted2);}
+  .accept-btn{padding:5px 12px;border-radius:6px;border:none;cursor:pointer;font-family:var(--font-body);font-size:11px;font-weight:600;transition:0.15s;}
+  .accept-btn.accept{background:var(--lime);color:#07090C;}
+  .accept-btn.accept:hover{background:#D4F570;}
+  .accept-btn.in{background:var(--surface3);color:var(--muted2);}
+
+  /* RIGHT PANEL */
+  .right-panel{width:280px;min-width:280px;border-left:1px solid var(--border);background:var(--surface);overflow-y:auto;padding:20px 16px;}
+  .rp-section{margin-bottom:24px;}
+  .rp-title{font-family:var(--font-display);font-size:18px;letter-spacing:1px;margin-bottom:12px;color:var(--text);}
+  .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+  .stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+  .stat-box .val{font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--lime);}
+  .stat-box .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+  .weekly-chart{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;}
+  .chart-bars{display:flex;align-items:flex-end;gap:6px;height:50px;margin-bottom:6px;}
+  .bar{flex:1;border-radius:3px 3px 0 0;background:var(--surface3);transition:0.2s;cursor:pointer;min-height:4px;}
+  .bar:hover{filter:brightness(1.2);}
+  .bar.active{background:var(--lime);}
+  .bar.partial{background:var(--lime-dim);}
+  .chart-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);}
+  .integrations{display:flex;flex-direction:column;gap:8px;}
+  .integration-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:0.15s;}
+  .integration-row:hover{border-color:var(--muted);}
+  .int-logo{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+  .int-strava{background:#FC4C02;color:#fff;}
+  .int-garmin{background:#007CC3;color:#fff;}
+  .int-polar{background:#D2051E;color:#fff;}
+  .int-info{flex:1;}
+  .int-name{font-size:12px;font-weight:600;color:var(--text);}
+  .int-status{font-size:10px;margin-top:1px;}
+  .status-connected{color:var(--lime);}
+  .status-connect{color:var(--muted);}
+  .int-arrow svg{width:14px;height:14px;stroke:var(--muted);}
+  .upcoming-run{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .upcoming-run:last-child{border-bottom:none;}
+  .ur-date{text-align:center;background:var(--surface2);border-radius:6px;padding:6px 10px;min-width:40px;}
+  .ur-day{font-family:var(--font-display);font-size:18px;line-height:1;color:var(--lime);}
+  .ur-mon{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .ur-info{flex:1;}
+  .ur-name{font-size:12px;font-weight:600;color:var(--text);}
+  .ur-details{font-size:11px;color:var(--muted);margin-top:2px;}
+  .ur-group{font-size:10px;color:var(--blue);margin-top:3px;}
+
+  /* LEADERBOARD */
+  .lb-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-rank{font-family:var(--font-mono);font-size:12px;color:var(--muted);width:20px;text-align:center;flex-shrink:0;}
+  .lb-rank.gold{color:#F5C842;}
+  .lb-rank.silver{color:#A8B4C8;}
+  .lb-rank.bronze{color:#CD7C4D;}
+  .lb-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:11px;flex-shrink:0;}
+  .lb-name{flex:1;font-size:12px;font-weight:500;color:var(--text);}
+  .lb-val{font-family:var(--font-mono);font-size:12px;color:var(--lime);font-weight:700;}
+
+  /* PANEL VISIBILITY */
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  /* ROUTE MAP SVG TRAIL */
+  .trail-path{stroke:var(--lime);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .trail-dot{fill:var(--lime);}
+  .trail-dot-end{fill:var(--coral);}
+
+  /* TOOLTIPS on bars */
+  .chart-bars .bar[data-val]{position:relative;}
+
+  /* ANIMATION */
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .activity-card,.group-card,.challenge-card{animation:fadeIn 0.3s ease both;}
+
+  /* NOTIFICATION TOAST */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--lime);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text);z-index:100;transform:translateY(20px);opacity:0;transition:0.3s;pointer-events:none;max-width:260px;}
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast-icon{color:var(--lime);font-size:18px;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-text">STRIDE</div>
+    <div class="logo-sub">Run Together</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Discover</div>
+      <div class="nav-item active" data-tab="feed" onclick="switchNav(this,'feed')">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+        Feed
+      </div>
+      <div class="nav-item" data-tab="groups" onclick="switchNav(this,'groups')">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        Communities
+        <span class="badge">3</span>
+      </div>
+      <div class="nav-item" data-tab="challenges" onclick="switchNav(this,'challenges')">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+        Challenges
+      </div>
+      <div class="nav-item" onclick="showToast('Routes feature coming soon!')">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 1 8 8c0 5.25-8 14-8 14S4 15.25 4 10a8 8 0 0 1 8-8z"/></svg></span>
+        Routes
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">You</div>
+      <div class="nav-item" onclick="showToast('Profile page coming soon!')">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
+        My Profile
+      </div>
+      <div class="nav-item" onclick="showToast('Training log coming soon!')">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+        Log
+      </div>
+      <div class="nav-item" onclick="showToast('Gear tracking coming soon!')">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></span>
+        Gear
+      </div>
+    </div>
+  </nav>
+  <div class="profile-card">
+    <div class="profile-row">
+      <div class="avatar">RV</div>
+      <div>
+        <div class="profile-name">Rishi V.</div>
+        <div class="profile-level">Level 12 · Pacer</div>
+      </div>
+    </div>
+    <div class="xp-bar"><div class="xp-fill"></div></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="search-box">
+      <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      <input type="text" placeholder="Search runners, groups, routes…" />
+    </div>
+    <div class="topbar-actions">
+      <div class="live-badge"><span class="live-dot"></span> 2,847 running now</div>
+      <div class="icon-btn notif-dot" onclick="showToast('You have 3 new notifications')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <div class="icon-btn" onclick="showToast('Messages coming soon!')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <!-- FEED / PANELS -->
+    <div class="feed-col">
+
+      <!-- FEED PANEL -->
+      <div id="panel-feed" class="panel active">
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'feed')">Activity</div>
+          <div class="tab" onclick="switchTab(this,'explore')">Explore</div>
+          <div class="tab" onclick="switchTab(this,'local')">Near Me</div>
+        </div>
+
+        <div class="section-header">
+          <div class="section-title">Recent Activity</div>
+          <div class="see-all">See all →</div>
+        </div>
+
+        <!-- CARD 1 -->
+        <div class="activity-card">
+          <div class="ac-header">
+            <div class="ac-avatar-placeholder" style="background:rgba(200,241,53,0.15);">AR</div>
+            <div>
+              <div class="ac-name">Aryan Mehta</div>
+              <div class="ac-meta">35 min ago · Connaught Place Loop</div>
+            </div>
+            <div class="ac-badge badge-run">Road Run</div>
+          </div>
+          <div class="ac-title">Morning tempo — felt strong all the way 🔥</div>
+          <div class="ac-stats">
+            <div class="stat-pill"><div class="stat-val">12.4</div><div class="stat-lbl">km</div></div>
+            <div class="stat-pill"><div class="stat-val">4:52</div><div class="stat-lbl">pace</div></div>
+            <div class="stat-pill"><div class="stat-val">58:03</div><div class="stat-lbl">time</div></div>
+            <div class="stat-pill"><div class="stat-val">148</div><div class="stat-lbl">bpm avg</div></div>
+          </div>
+          <div class="map-preview">
+            <svg class="map-svg" viewBox="0 0 500 80" preserveAspectRatio="none">
+              <path class="trail-path" d="M20,55 C60,40 80,20 120,25 C160,30 180,55 220,45 C260,35 280,15 330,20 C370,24 400,50 440,42 C460,38 470,30 480,32" stroke-dasharray="600" stroke-dashoffset="0"/>
+              <circle class="trail-dot" cx="20" cy="55" r="4"/>
+              <circle class="trail-dot-end" cx="480" cy="32" r="4"/>
+            </svg>
+          </div>
+          <div class="ac-actions">
+            <button class="action-btn" onclick="toggleLike(this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <span>47</span>
+            </button>
+            <button class="action-btn" onclick="showToast('Comments coming soon!')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>12</span>
+            </button>
+            <button class="action-btn" onclick="showToast('Give a kudos to Aryan!')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+              Kudos
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="activity-card">
+          <div class="ac-header">
+            <div class="ac-avatar-placeholder" style="background:rgba(63,145,255,0.15);">SK</div>
+            <div>
+              <div class="ac-name">Sneha Kapoor</div>
+              <div class="ac-meta">2 hrs ago · Aravalli Trail</div>
+            </div>
+            <div class="ac-badge badge-trail">Trail</div>
+          </div>
+          <div class="ac-title">Aravalli sunrise run — worth every early morning alarm</div>
+          <div class="ac-stats">
+            <div class="stat-pill"><div class="stat-val">8.7</div><div class="stat-lbl">km</div></div>
+            <div class="stat-pill"><div class="stat-val">6:14</div><div class="stat-lbl">pace</div></div>
+            <div class="stat-pill"><div class="stat-val">54:14</div><div class="stat-lbl">time</div></div>
+            <div class="stat-pill"><div class="stat-val">320</div><div class="stat-lbl">elev m</div></div>
+          </div>
+          <div class="map-preview">
+            <svg class="map-svg" viewBox="0 0 500 80" preserveAspectRatio="none">
+              <path class="trail-path" d="M20,60 C40,58 55,30 80,20 C105,10 120,35 150,40 C180,45 195,20 230,15 C265,10 280,35 310,45 C335,52 355,30 390,25 C415,21 440,45 480,50" stroke-dasharray="600" stroke-dashoffset="0" stroke="#3F91FF"/>
+              <circle cx="20" cy="60" r="4" fill="#3F91FF"/>
+              <circle cx="480" cy="50" r="4" fill="#FF5B38"/>
+            </svg>
+          </div>
+          <div class="ac-actions">
+            <button class="action-btn liked" onclick="toggleLike(this)">
+              <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <span>83</span>
+            </button>
+            <button class="action-btn" onclick="showToast('Comments coming soon!')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>28</span>
+            </button>
+            <button class="action-btn" onclick="showToast('Kudos sent to Sneha!')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+              Kudos
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD 3 RACE -->
+        <div class="activity-card">
+          <div class="ac-header">
+            <div class="ac-avatar-placeholder" style="background:rgba(255,91,56,0.15);">PD</div>
+            <div>
+              <div class="ac-name">Priya Deshpande</div>
+              <div class="ac-meta">Yesterday · Delhi Half Marathon</div>
+            </div>
+            <div class="ac-badge badge-race">Race</div>
+          </div>
+          <div class="ac-title">New PB 🏅 — 1:44:22 at Delhi Half. 6 weeks of hard work paid off!</div>
+          <div class="ac-stats">
+            <div class="stat-pill"><div class="stat-val">21.1</div><div class="stat-lbl">km</div></div>
+            <div class="stat-pill"><div class="stat-val">4:58</div><div class="stat-lbl">pace</div></div>
+            <div class="stat-pill"><div class="stat-val">1:44</div><div class="stat-lbl">time</div></div>
+            <div class="stat-pill"><div class="stat-val">162</div><div class="stat-lbl">bpm avg</div></div>
+          </div>
+          <div class="ac-actions">
+            <button class="action-btn" onclick="toggleLike(this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <span>241</span>
+            </button>
+            <button class="action-btn" onclick="showToast('Comments coming soon!')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>64</span>
+            </button>
+            <button class="action-btn" onclick="showToast('Kudos sent to Priya! Amazing PB!')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+              Kudos
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GROUPS PANEL -->
+      <div id="panel-groups" class="panel">
+        <div class="section-header">
+          <div class="section-title">Communities</div>
+          <div class="see-all" onclick="showToast('Create your own group!')">+ Create Group</div>
+        </div>
+        <div class="group-grid">
+          <div class="group-card g1" onclick="showToast('Joined Delhi Dawn Runners!')">
+            <div class="group-name">Delhi Dawn Runners</div>
+            <div class="group-desc">6AM crew. Connaught Place to Lodhi Garden. All paces welcome.</div>
+            <div class="next-run"><strong>Next run:</strong> Tomorrow 6:00 AM · CP Loop</div>
+            <div class="group-footer" style="margin-top:10px;">
+              <div class="member-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>847 members</div>
+              <button class="join-btn joined" onclick="event.stopPropagation();toggleJoin(this)">✓ Joined</button>
+            </div>
+          </div>
+          <div class="group-card g2" onclick="showToast('Viewing Aravalli Trail Tribe!')">
+            <div class="group-name">Aravalli Trail Tribe</div>
+            <div class="group-desc">Weekend trail runs in the Aravalli range. Mud, elevation, and chai after.</div>
+            <div class="next-run"><strong>Next run:</strong> Sat 5:30 AM · Asola Trail</div>
+            <div class="group-footer" style="margin-top:10px;">
+              <div class="member-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>413 members</div>
+              <button class="join-btn join" onclick="event.stopPropagation();toggleJoin(this)">+ Join</button>
+            </div>
+          </div>
+          <div class="group-card g3" onclick="showToast('Viewing Sub-20 5K Club!')">
+            <div class="group-name">Sub-20 5K Club</div>
+            <div class="group-desc">Speedwork, intervals, track sessions. Chasing sub-20 together. Data-driven training.</div>
+            <div class="next-run"><strong>Next run:</strong> Fri 7:00 PM · Siri Fort Track</div>
+            <div class="group-footer" style="margin-top:10px;">
+              <div class="member-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>228 members</div>
+              <button class="join-btn join" onclick="event.stopPropagation();toggleJoin(this)">+ Join</button>
+            </div>
+          </div>
+          <div class="group-card g4" onclick="showToast('Viewing Ultrarunners NCR!')">
+            <div class="group-name">Ultrarunners NCR</div>
+            <div class="group-desc">50K and beyond. Long slow distances, midnight runs, and suffering together.</div>
+            <div class="group-footer" style="margin-top:10px;">
+              <div class="member-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>96 members</div>
+              <button class="join-btn join" onclick="event.stopPropagation();toggleJoin(this)">+ Join</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHALLENGES PANEL -->
+      <div id="panel-challenges" class="panel">
+        <div class="section-header">
+          <div class="section-title">Active Challenges</div>
+          <div class="see-all" onclick="showToast('All challenges page coming soon!')">Browse all</div>
+        </div>
+
+        <div class="challenge-card">
+          <div class="challenge-icon ci-lime">⚡</div>
+          <div class="challenge-content">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div class="challenge-name">May 150K Challenge</div>
+              <button class="accept-btn in" onclick="showToast('Already enrolled in this challenge!')">In Progress</button>
+            </div>
+            <div class="challenge-desc">Run 150km this month. Any pace, any surface. Just keep moving.</div>
+            <div class="challenge-progress">
+              <div class="progress-label"><span>89.4 km done</span><span>150 km</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+            </div>
+            <div class="challenge-meta">
+              <span class="ch-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>10 days left</span>
+              <span class="ch-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>1,284 runners</span>
+              <span class="ch-meta-item" style="color:var(--lime);font-weight:600;">🏆 Rank #142</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="challenge-card">
+          <div class="challenge-icon ci-blue">🌅</div>
+          <div class="challenge-content">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div class="challenge-name">10 Sunrise Runs</div>
+              <button class="accept-btn in" onclick="showToast('6 more sunrise runs to go!')">In Progress</button>
+            </div>
+            <div class="challenge-desc">Log 10 runs that start before 7 AM. Any distance counts. Early birds win.</div>
+            <div class="challenge-progress">
+              <div class="progress-label"><span>4 of 10 runs</span><span>10 runs</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:40%;background:var(--blue)"></div></div>
+            </div>
+            <div class="challenge-meta">
+              <span class="ch-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>No deadline</span>
+              <span class="ch-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>562 runners</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="challenge-card">
+          <div class="challenge-icon ci-coral">🏃</div>
+          <div class="challenge-content">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div class="challenge-name">Sub-5 Pace Week</div>
+              <button class="accept-btn accept" onclick="acceptChallenge(this)">Accept</button>
+            </div>
+            <div class="challenge-desc">Log at least 3 runs under 5:00/km pace in a single week. Speed test yourself.</div>
+            <div class="challenge-meta" style="margin-top:8px;">
+              <span class="ch-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Starts Mon</span>
+              <span class="ch-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>89 runners</span>
+              <span class="ch-meta-item" style="color:var(--coral);">🔥 New this week</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="challenge-card">
+          <div class="challenge-icon" style="background:rgba(181,123,255,0.12);">🤝</div>
+          <div class="challenge-content">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div class="challenge-name">Group Relay — Delhi Edition</div>
+              <button class="accept-btn accept" onclick="acceptChallenge(this)">Join Team</button>
+            </div>
+            <div class="challenge-desc">Team of 5 splits a 100km relay. Sign up, get matched, run your leg. Happening 8 Jun.</div>
+            <div class="challenge-meta" style="margin-top:8px;">
+              <span class="ch-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Jun 8</span>
+              <span class="ch-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>12 teams, 3 open spots</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end feed-col -->
+
+    <!-- RIGHT PANEL -->
+    <aside class="right-panel">
+
+      <!-- MY STATS -->
+      <div class="rp-section">
+        <div class="rp-title">This Month</div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="val">89.4</div><div class="lbl">km run</div></div>
+          <div class="stat-box"><div class="val">11</div><div class="lbl">activities</div></div>
+          <div class="stat-box"><div class="val">7:14</div><div class="lbl">hrs total</div></div>
+          <div class="stat-box"><div class="val">650</div><div class="lbl">elev m</div></div>
+        </div>
+        <div class="weekly-chart">
+          <div class="chart-bars" id="chartBars"></div>
+          <div class="chart-labels" id="chartLabels"></div>
+        </div>
+      </div>
+
+      <!-- UPCOMING RUNS -->
+      <div class="rp-section">
+        <div class="rp-title">Upcoming Runs</div>
+        <div class="upcoming-run">
+          <div class="ur-date"><div class="ur-day">22</div><div class="ur-mon">May</div></div>
+          <div class="ur-info">
+            <div class="ur-name">Delhi Dawn Runners</div>
+            <div class="ur-details">6:00 AM · CP Loop · 10K</div>
+            <div class="ur-group">Delhi Dawn Runners</div>
+          </div>
+        </div>
+        <div class="upcoming-run">
+          <div class="ur-date"><div class="ur-day">24</div><div class="ur-mon">May</div></div>
+          <div class="ur-info">
+            <div class="ur-name">Track Tuesday</div>
+            <div class="ur-details">7:00 PM · Siri Fort · 6×1K</div>
+            <div class="ur-group">Sub-20 5K Club</div>
+          </div>
+        </div>
+        <div class="upcoming-run">
+          <div class="ur-date"><div class="ur-day">01</div><div class="ur-mon">Jun</div></div>
+          <div class="ur-info">
+            <div class="ur-name">Aravalli Long Run</div>
+            <div class="ur-details">5:30 AM · Asola · 18K trail</div>
+            <div class="ur-group">Aravalli Trail Tribe</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WEEKLY LEADERBOARD -->
+      <div class="rp-section">
+        <div class="rp-title">Group Leaderboard</div>
+        <div id="leaderboard">
+          <div class="lb-row"><div class="lb-rank gold">1</div><div class="lb-av" style="background:rgba(245,200,66,0.15);color:#F5C842">PD</div><div class="lb-name">Priya D.</div><div class="lb-val">67.2 km</div></div>
+          <div class="lb-row"><div class="lb-rank silver">2</div><div class="lb-av" style="background:rgba(168,180,200,0.15);color:#A8B4C8">AM</div><div class="lb-name">Aryan M.</div><div class="lb-val">58.4 km</div></div>
+          <div class="lb-row"><div class="lb-rank bronze">3</div><div class="lb-av" style="background:rgba(205,124,77,0.15);color:#CD7C4D">SK</div><div class="lb-name">Sneha K.</div><div class="lb-val">51.1 km</div></div>
+          <div class="lb-row" style="background:rgba(200,241,53,0.06);border-radius:6px;padding-left:4px;"><div class="lb-rank" style="color:var(--lime)">4</div><div class="lb-av" style="background:rgba(200,241,53,0.15);color:var(--lime)">RV</div><div class="lb-name" style="color:var(--lime)">You</div><div class="lb-val">47.3 km</div></div>
+          <div class="lb-row"><div class="lb-rank">5</div><div class="lb-av" style="background:rgba(63,145,255,0.15);color:var(--blue)">RS</div><div class="lb-name">Rohit S.</div><div class="lb-val">41.8 km</div></div>
+        </div>
+      </div>
+
+      <!-- INTEGRATIONS -->
+      <div class="rp-section">
+        <div class="rp-title">Connected Apps</div>
+        <div class="integrations">
+          <div class="integration-row" onclick="showToast('Strava is syncing your activities!')">
+            <div class="int-logo int-strava">S</div>
+            <div class="int-info">
+              <div class="int-name">Strava</div>
+              <div class="int-status status-connected">● Synced 35 min ago</div>
+            </div>
+            <div class="int-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+          </div>
+          <div class="integration-row" onclick="showToast('Garmin Connect synced!')">
+            <div class="int-logo int-garmin">G</div>
+            <div class="int-info">
+              <div class="int-name">Garmin Connect</div>
+              <div class="int-status status-connected">● Synced 1 hr ago</div>
+            </div>
+            <div class="int-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+          </div>
+          <div class="integration-row" onclick="showToast('Click to connect Polar Flow!')">
+            <div class="int-logo int-polar">P</div>
+            <div class="int-info">
+              <div class="int-name">Polar Flow</div>
+              <div class="int-status status-connect">Connect account →</div>
+            </div>
+            <div class="int-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon">⚡</span>
+  <span id="toast-msg">Message here</span>
+</div>
+
+<script>
+  // BUILD WEEKLY CHART
+  const weekData = [
+    {day:'M',km:6.2,active:false},
+    {day:'T',km:0,active:false},
+    {day:'W',km:11.4,active:false},
+    {day:'T',km:8.7,active:false},
+    {day:'F',km:0,active:false},
+    {day:'S',km:14.2,active:false},
+    {day:'S',km:0,active:true}
+  ];
+  const maxKm = Math.max(...weekData.map(d=>d.km),1);
+  const barsEl = document.getElementById('chartBars');
+  const labelsEl = document.getElementById('chartLabels');
+  weekData.forEach(d=>{
+    const bar = document.createElement('div');
+    bar.className = 'bar' + (d.active?' active':(d.km>0?' partial':''));
+    bar.style.height = d.km>0 ? Math.max(6,Math.round((d.km/maxKm)*50))+'px' : '4px';
+    bar.title = d.km>0 ? d.km+'km' : 'Rest day';
+    barsEl.appendChild(bar);
+    const lbl = document.createElement('span');
+    lbl.textContent = d.day;
+    labelsEl.appendChild(lbl);
+  });
+
+  // NAV SWITCHING
+  function switchNav(el, panelId) {
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+panelId).classList.add('active');
+    // reset tab highlight in feed
+    if(panelId==='feed'){
+      document.querySelectorAll('.tab').forEach((t,i)=>{t.classList.toggle('active',i===0);});
+    }
+  }
+
+  // TABS (within feed)
+  function switchTab(el, name){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    showToast(name.charAt(0).toUpperCase()+name.slice(1)+' view coming soon!');
+  }
+
+  // LIKE TOGGLE
+  function toggleLike(btn){
+    const numSpan = btn.querySelector('span');
+    const n = parseInt(numSpan.textContent);
+    const svg = btn.querySelector('svg');
+    if(btn.classList.contains('liked')){
+      btn.classList.remove('liked');
+      numSpan.textContent = n-1;
+      svg.setAttribute('fill','none');
+    } else {
+      btn.classList.add('liked');
+      numSpan.textContent = n+1;
+      svg.setAttribute('fill','currentColor');
+      showToast('Liked! ❤️');
+    }
+  }
+
+  // JOIN GROUP
+  function toggleJoin(btn){
+    if(btn.classList.contains('join')){
+      btn.classList.remove('join');
+      btn.classList.add('joined');
+      btn.textContent = '✓ Joined';
+      showToast('Joined the group! 🏃');
+    } else {
+      btn.classList.remove('joined');
+      btn.classList.add('join');
+      btn.textContent = '+ Join';
+      showToast('Left the group.');
+    }
+  }
+
+  // ACCEPT CHALLENGE
+  function acceptChallenge(btn){
+    btn.classList.remove('accept');
+    btn.classList.add('in');
+    btn.textContent = 'In Progress';
+    showToast('Challenge accepted! Let\'s go ⚡');
+  }
+
+  // TOAST
+  let toastTimer;
+  function showToast(msg){
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>toast.classList.remove('show'), 2800);
+  }
+</script>
+</body>
+</html>
