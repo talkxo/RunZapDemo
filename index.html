@@ -3,249 +3,943 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RunZap - Premium Running Platform</title>
+  <title>RunZap - Premium Runner Club & Community</title>
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
+  <!-- Loading Splash Screen -->
+  <div id="splash-screen" class="splash-screen" aria-hidden="true">
+    <div class="splash-core">
+      <div class="splash-wordmark">
+        <strong>RunZap</strong>
+      </div>
+      <p class="splash-kicker">Connect. Sync. Run Together.</p>
+    </div>
+  </div>
+
+  <!-- Primary Application Wrapper -->
   <div id="app-shell">
     
-    <!-- Global Header -->
+    <!-- Unified Top Navigation -->
     <header class="top-nav">
-      <div class="brand">RunZap</div>
-      <div class="profile-avatar">
-        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80" alt="Profile">
+      <div class="brand-lockup">
+        <div class="brand-icon">Z</div>
+        <div class="brand-copy">
+          <span class="brand-name">RunZap</span>
+          <span class="brand-subtitle">Athletic Sync Network</span>
+        </div>
+      </div>
+      
+      <div class="nav-actions">
+        <!-- Accent Theme Switcher -->
+        <div class="theme-selector-container" aria-label="Accent Themes">
+          <button class="theme-btn active" data-theme="obsidian" title="Obsidian Dark"></button>
+          <button class="theme-btn" data-theme="strava" title="Strava Fire"></button>
+          <button class="theme-btn" data-theme="garmin" title="Garmin Cyan"></button>
+          <button class="theme-btn" data-theme="light" title="Light Slate"></button>
+        </div>
+        
+        <!-- Wearable Sync Quick Trigger -->
+        <button id="sync-quick-btn" class="sync-trigger-btn" type="button">
+          <span class="sync-pulse"></span>
+          <span>Sync Wearable</span>
+        </button>
       </div>
     </header>
 
-    <!-- Main Content Area -->
     <main>
       
-      <!-- SCREEN 1: HOMEPAGE (DASHBOARD) -->
-      <div id="view-home" class="screen active">
-        <div class="section-title">
-          <span>Overview</span>
-          <span style="font-size: 0.8rem; font-weight: 500; color: var(--primary);">This Week</span>
-        </div>
-
-        <div class="hero-stats">
-          <div class="stat-box">
-            <span class="stat-value text-gradient">42.5</span>
-            <span class="stat-label">KM Run</span>
+      <!-- SCREEN 1: TODAY / PERSONAL DASHBOARD (Garmin / Strava hybrid) -->
+      <section id="view-home" class="screen active">
+        
+        <!-- Active Challenge Progress Rail -->
+        <section id="challenge-summary" class="challenge-rail-section">
+          <div class="card-heading compact">
+            <div>
+              <p class="section-kicker">Ongoing Campaigns</p>
+              <h2>Your Active Challenges</h2>
+            </div>
           </div>
-          <div class="stat-box">
-            <span class="stat-value text-gradient" style="background: linear-gradient(135deg, #00B4D8, #48CAE4); -webkit-background-clip: text;">4</span>
-            <span class="stat-label">Activities</span>
-          </div>
-        </div>
-
-        <div class="glass-card">
-          <div class="progress-ring-container">
-            <div class="ring-wrapper">
-              <div class="ring">
-                <div class="ring-inner">75%</div>
+          
+          <div class="challenge-rail" aria-label="Challenge Cards">
+            <!-- Card 1: Trail Climb (Active) -->
+            <article class="challenge-rail-card glass-card">
+              <div class="challenge-rail-media" style="background-image: url('https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=600&q=80');">
+                <span class="rail-tag active">Active</span>
+                <div class="rail-overlay">
+                  <div>
+                    <p class="rail-kicker">Leopard Trail block</p>
+                    <h3>Sanjay Gandhi National Park</h3>
+                  </div>
+                  <span id="active-challenge-distance" class="rail-distance">19.0 / 100 km</span>
+                </div>
               </div>
+              <div class="challenge-rail-body">
+                <div class="rail-meta">
+                  <span>Day 3 of 14</span>
+                  <span>Mumbai, IN</span>
+                </div>
+                <div class="rail-stats">
+                  <div>
+                    <span>Completion</span>
+                    <strong id="completion-rate">19%</strong>
+                  </div>
+                  <div>
+                    <span>Best stretch</span>
+                    <strong id="best-stretch">Day 3</strong>
+                  </div>
+                  <div>
+                    <span>Weekly rank</span>
+                    <strong id="weekly-rank">3rd</strong>
+                  </div>
+                </div>
+                <div class="rail-actions">
+                  <button class="solid-action" type="button" data-scroll-target="route-map-section">Open Route Map</button>
+                  <button class="ghost-action" type="button" id="badge-view-trigger-leopard">View Certificate</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 2: Lonavala Hill Warm-up (Upcoming) -->
+            <article class="challenge-rail-card glass-card">
+              <div class="challenge-rail-media" style="background-image: url('https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&w=600&q=80');">
+                <span class="rail-tag upcoming">Upcoming</span>
+                <div class="rail-overlay">
+                  <div>
+                    <p class="rail-kicker">Western Ghats 12K</p>
+                    <h3>Hill route warm-up</h3>
+                  </div>
+                  <span class="rail-distance">Starts Jun 28</span>
+                </div>
+              </div>
+              <div class="challenge-rail-body">
+                <div class="rail-meta">
+                  <span>12 km</span>
+                  <span>Lonavala</span>
+                </div>
+                <p class="rail-description">A high-elevation ascent warm-up loop. Test your climb endurance before the monsoon relay.</p>
+                <div class="rail-actions">
+                  <button id="register-race-ghats" class="solid-action" type="button">Register Challenge</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- Main Dashboard Split Grid -->
+        <div class="home-main-grid">
+          
+          <!-- Column 1: Map Widget and splits (Left) -->
+          <div class="home-map-area">
+            <article id="route-map-section" class="glass-card recent-run-card">
+              <div class="card-heading">
+                <div>
+                  <p class="section-kicker">Latest Activity</p>
+                  <h2>Recorded Route Map</h2>
+                </div>
+                <button class="text-action" type="button" data-open-view="view-notes">Open Logs</button>
+              </div>
+              <p class="recent-run-copy">
+                This shows the most recently logged route path mapped with Leaflet and styled with high-fidelity pacing indexes.
+              </p>
+              
+              <div class="recent-run-topline">
+                <div class="recent-run-summary">
+                  <strong id="recent-run-title">SGNP lower loop</strong>
+                  <span id="recent-run-subtitle">Recorded this morning • Sanjay Gandhi National Park, Mumbai</span>
+                </div>
+                <div class="recent-run-chips">
+                  <span id="recent-run-surface" class="route-chip">Trail</span>
+                  <span id="recent-run-time" class="route-chip">6:12 AM start</span>
+                </div>
+              </div>
+              
+              <div class="recent-run-map-wrap">
+                <div id="recent-run-map" class="recent-run-map" aria-label="Activity GPS route map"></div>
+                <div class="recent-run-map-note">
+                  <strong>Pacing Notes</strong>
+                  <span id="recent-run-note">Steady climb up to the ridge, negative-split pace on the rocky return.</span>
+                </div>
+              </div>
+              
+              <!-- Metrics Odometer Strip -->
+              <div class="recent-run-stats">
+                <div>
+                  <span>Distance</span>
+                  <strong id="recent-run-distance">6.4 km</strong>
+                </div>
+                <div>
+                  <span>Duration</span>
+                  <strong id="recent-run-duration">00:39:18</strong>
+                </div>
+                <div>
+                  <span>Avg pace</span>
+                  <strong id="recent-run-pace">06:08 /km</strong>
+                </div>
+                <div>
+                  <span>Elevation</span>
+                  <strong id="recent-run-elevation">142 m</strong>
+                </div>
+              </div>
+
+              <!-- Pacing Split Breakdowns (Static Split table) -->
+              <div class="split-table-wrap">
+                <div class="split-table-title">
+                  <span>Km Splits Analysis</span>
+                  <span>Target: 06:10 /km</span>
+                </div>
+                <table class="split-table">
+                  <thead>
+                    <tr>
+                      <th>Km</th>
+                      <th>Split Pace</th>
+                      <th>Variance</th>
+                      <th>Relative Effort</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pacing-split-body">
+                    <tr>
+                      <td><strong>1</strong></td>
+                      <td>06:18 /km</td>
+                      <td style="color: var(--primary);">+0:08</td>
+                      <td>
+                        <div class="split-bar-container"><div class="split-bar-fill" style="width: 80%;"></div></div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><strong>2</strong></td>
+                      <td>06:04 /km</td>
+                      <td style="color: var(--secondary);">-0:06</td>
+                      <td>
+                        <div class="split-bar-container"><div class="split-bar-fill" style="width: 60%; background: var(--secondary);"></div></div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><strong>3</strong></td>
+                      <td>06:12 /km</td>
+                      <td style="color: var(--primary);">+0:02</td>
+                      <td>
+                        <div class="split-bar-container"><div class="split-bar-fill" style="width: 72%;"></div></div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><strong>4</strong></td>
+                      <td>05:58 /km</td>
+                      <td style="color: var(--secondary);">-0:12</td>
+                      <td>
+                        <div class="split-bar-container"><div class="split-bar-fill" style="width: 50%; background: var(--secondary);"></div></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <!-- Column 2: Garmin High-Density Metrics Sidebar (Right) -->
+          <div class="home-sidebar-metrics">
+            
+            <!-- Garmin connect health card -->
+            <article class="glass-card metrics-card">
+              <div class="metrics-heading">
+                <h3>Garmin Connect</h3>
+                <span>Sync Active</span>
+              </div>
+              
+              <div class="metric-strip-grid">
+                <!-- Metric item 1: Training Readiness -->
+                <div class="metric-strip">
+                  <div class="metric-strip-copy">
+                    <strong>Training Readiness</strong>
+                    <span>Muscle recovery & sleep</span>
+                  </div>
+                  <div class="metric-value-wrap">
+                    <span class="metric-strip-val" style="color: var(--primary);">92 / 100</span>
+                    <div class="metric-strip-progress-bar"><span style="width: 92%;"></span></div>
+                  </div>
+                </div>
+
+                <!-- Metric item 2: Body Battery -->
+                <div class="metric-strip secondary">
+                  <div class="metric-strip-copy">
+                    <strong>Body Battery</strong>
+                    <span>Energy charge level</span>
+                  </div>
+                  <div class="metric-value-wrap">
+                    <span class="metric-strip-val" style="color: var(--secondary);">85 %</span>
+                    <div class="metric-strip-progress-bar"><span style="width: 85%;"></span></div>
+                  </div>
+                </div>
+
+                <!-- Metric item 3: Heart Rate -->
+                <div class="metric-strip accent">
+                  <div class="metric-strip-copy">
+                    <strong>Resting HR</strong>
+                    <span>Cardio health indexes</span>
+                  </div>
+                  <div class="metric-value-wrap">
+                    <span class="metric-strip-val" style="color: var(--accent);">51 bpm</span>
+                    <div class="metric-strip-progress-bar"><span style="width: 51%; background: var(--accent);"></span></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <!-- Active Gear shoe tracker -->
+            <article class="glass-card metrics-card">
+              <div class="metrics-heading">
+                <h3>Gear Odometer</h3>
+                <span>Active Shoe</span>
+              </div>
+              <div>
+                <strong style="font-size: 1.15rem; color: var(--text-main); display: block;">Nike Pegasus 40 Trail</strong>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Recommended retirement: 650 km</span>
+                <div class="shoe-mileage-bar">
+                  <div id="shoe-odometer-bar" class="shoe-mileage-bar-fill" style="width: 53.6%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-top: 4px;">
+                  <span id="shoe-odometer-miles" style="color: var(--text-main);">348.4 km logged</span>
+                  <span style="color: var(--text-muted);">53% wear</span>
+                </div>
+              </div>
+            </article>
+            
+          </div>
+        </div>
+
+        <!-- Dashboard recap footer (Today's note & weekly rank leaderboard) -->
+        <div class="home-support-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 24px;">
+          <!-- Daily journal quick read -->
+          <article id="note-section" class="glass-card daily-note-card">
+            <div class="card-heading compact">
+              <div>
+                <p class="section-kicker">Today's Entry</p>
+                <h3 id="day-note-title">Day 3 Note</h3>
+              </div>
+              <button class="text-action" type="button" data-open-view="view-notes">Open Journal</button>
+            </div>
+            <p id="day-note-body" class="daily-note-copy">Shaded climb felt controlled today. The recent run map shows the cleanest route of the challenge so far.</p>
+            <div class="daily-note-meta" style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-glass);">
+              <span id="day-note-tag" style="color: var(--primary);">Bridge rise</span>
+              <span>Running log</span>
+            </div>
+          </article>
+
+          <!-- Weekly Leaderboard leaderboard -->
+          <article id="leaderboard-section" class="glass-card recap-card">
+            <div class="card-heading compact">
+              <div>
+                <p class="section-kicker">Challenge Standings</p>
+                <h3>Mumbai Club Rankings</h3>
+              </div>
+            </div>
+            <div class="leaderboard-toolbar">
+              <div class="leaderboard-tabs">
+                <button class="leader-tab active" type="button" data-leader-range="week">Week</button>
+                <button class="leader-tab" type="button" data-leader-range="month">Month</button>
+              </div>
+              <span class="leader-sort">Total Distance</span>
+            </div>
+            <div class="leaderboard-list">
+              <div class="leader-row">
+                <span class="leader-rank">01</span>
+                <div class="leader-copy">
+                  <strong>Mike Phelan</strong>
+                  <span>46.8 km this week</span>
+                </div>
+                <span class="leader-gap">Lead</span>
+              </div>
+              <div class="leader-row">
+                <span class="leader-rank">02</span>
+                <div class="leader-copy">
+                  <strong>Aisha Khan</strong>
+                  <span>38.2 km this week</span>
+                </div>
+                <span class="leader-gap">Near</span>
+              </div>
+              <div id="leader-row-user" class="leader-row active">
+                <span class="leader-rank">03</span>
+                <div class="leader-copy">
+                  <strong>You (Rahul)</strong>
+                  <span id="leader-user-distance">25.4 km this week</span>
+                </div>
+                <span class="leader-gap">+1</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- SCREEN 2: EXPLORE FEED, CLUBS & RACES -->
+      <section id="view-explore" class="screen">
+        
+        <!-- Segment Subnavigation switches -->
+        <nav class="explore-subnav">
+          <button class="explore-subtab-btn active" data-subtab="view-sub-feed">Social Feed</button>
+          <button class="explore-subtab-btn" data-subtab="view-sub-clubs">Groups & Clubs</button>
+          <button class="explore-subtab-btn" data-subtab="view-sub-races">Race Directory</button>
+        </nav>
+
+        <!-- Sub-View 2A: Social Community Feed (Strava style) -->
+        <div id="view-sub-feed" class="explore-subscreen-panel" style="display: block;">
+          
+          <!-- Quick Manual Run uploader card -->
+          <article class="glass-card feed-uploader">
+            <h3>Log Running Activity</h3>
+            <form id="activity-uploader-form" class="feed-uploader-form">
+              <div class="input-group form-full-width">
+                <label for="upload-title">Activity Title</label>
+                <input type="text" id="upload-title" placeholder="Sunset Sea Link Loop, etc." required>
+              </div>
+              <div class="input-group">
+                <label for="upload-distance">Distance (km)</label>
+                <input type="number" id="upload-distance" step="0.1" min="0.1" placeholder="e.g. 5.0" required>
+              </div>
+              <div class="input-group">
+                <label for="upload-duration">Duration (HH:MM:SS)</label>
+                <input type="text" id="upload-duration" placeholder="e.g. 00:30:00" required>
+              </div>
+              <div class="input-group">
+                <label for="upload-surface">Running Surface</label>
+                <select id="upload-surface">
+                  <option value="Road">Road</option>
+                  <option value="Trail">Trail</option>
+                  <option value="Track">Track</option>
+                  <option value="Treadmill">Treadmill</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="upload-route">Select Route Path</label>
+                <select id="upload-route">
+                  <option value="sgnp">SGNP Lower Loop (6.4 km)</option>
+                  <option value="sealink">Bandra Sea Link Circuit (10.2 km)</option>
+                  <option value="nariman">Nariman Point Coastal Promenade (4.5 km)</option>
+                </select>
+              </div>
+              <div class="input-group form-full-width uploader-actions">
+                <button type="submit" class="solid-action">Post Activity</button>
+              </div>
+            </form>
+          </article>
+
+          <!-- Social Posts Stream -->
+          <div id="social-feed-container">
+            <!-- Feed Post 1: Mike Phelan -->
+            <article class="glass-card feed-card" data-post-index="0">
+              <div class="feed-card-header">
+                <div class="feed-avatar">
+                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80" alt="Mike Phelan">
+                </div>
+                <div class="feed-user-info">
+                  <strong>Mike Phelan</strong>
+                  <span>2 hours ago • Mumbai Road Runners</span>
+                </div>
+              </div>
+              <div class="feed-card-body">
+                <p class="feed-card-copy">Morning sea breeze sprint along Nariman Point. Cadence felt incredible today! Post-run coconut water hits the spot.</p>
+                <div class="feed-run-grid">
+                  <div class="feed-run-map" id="feed-map-mike" aria-label="Nariman point run route"></div>
+                  <div class="feed-run-stats-bar">
+                    <div class="feed-stat-box">
+                      <span>Distance</span>
+                      <strong>4.5 km</strong>
+                    </div>
+                    <div class="feed-stat-box">
+                      <span>Avg Pace</span>
+                      <strong>04:52 /km</strong>
+                    </div>
+                    <div class="feed-stat-box">
+                      <span>Moving Time</span>
+                      <strong>21:54</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="feed-actions">
+                <button class="kudos-btn" type="button" data-post-id="mike-1">
+                  <!-- Heart Icon SVG -->
+                  <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                  <span>Kudos (<span class="kudos-count">8</span>)</span>
+                </button>
+                <button class="comment-trigger" type="button" data-target-comments="comments-mike">
+                  <!-- Message Icon SVG -->
+                  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm0 4h8v2H6v-2zm0-8h12v2H6V5z"/></svg>
+                  <span>Comments (<span class="comments-count">2</span>)</span>
+                </button>
+              </div>
+              
+              <!-- Collapsible Comments Drawer -->
+              <div class="feed-comments-panel" id="comments-mike">
+                <div class="comments-list">
+                  <div class="comment-item">
+                    <strong>Aisha Khan</strong><span>Flying pace, Mike! Elite cadence.</span>
+                  </div>
+                  <div class="comment-item">
+                    <strong>Rahul Sharma</strong><span>Love the negative splits in the final km!</span>
+                  </div>
+                </div>
+                <div class="comment-input-wrap">
+                  <input type="text" placeholder="Add a comment..." aria-label="Type comment">
+                  <button type="button">Post</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- Feed Post 2: Aisha Khan -->
+            <article class="glass-card feed-card" data-post-index="1">
+              <div class="feed-card-header">
+                <div class="feed-avatar">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80" alt="Aisha Khan">
+                </div>
+                <div class="feed-user-info">
+                  <strong>Aisha Khan</strong>
+                  <span>6 hours ago • Sanjay Gandhi National Park</span>
+                </div>
+              </div>
+              <div class="feed-card-body">
+                <p class="feed-card-copy">Early trail climb up the Leopard Trail loop. Shaded portions kept the heat manageable, but elevation was no joke! 🏔️</p>
+                <div class="feed-run-grid">
+                  <div class="feed-run-map" id="feed-map-aisha" aria-label="Leopard trail run route"></div>
+                  <div class="feed-run-stats-bar">
+                    <div class="feed-stat-box">
+                      <span>Distance</span>
+                      <strong>6.4 km</strong>
+                    </div>
+                    <div class="feed-stat-box">
+                      <span>Avg Pace</span>
+                      <strong>06:21 /km</strong>
+                    </div>
+                    <div class="feed-stat-box">
+                      <span>Moving Time</span>
+                      <strong>40:38</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="feed-actions">
+                <button class="kudos-btn" type="button" data-post-id="aisha-1">
+                  <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                  <span>Kudos (<span class="kudos-count">12</span>)</span>
+                </button>
+                <button class="comment-trigger" type="button" data-target-comments="comments-aisha">
+                  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm0 4h8v2H6v-2zm0-8h12v2H6V5z"/></svg>
+                  <span>Comments (<span class="comments-count">1</span>)</span>
+                </button>
+              </div>
+              <div class="feed-comments-panel" id="comments-aisha">
+                <div class="comments-list">
+                  <div class="comment-item">
+                    <strong>Mike Phelan</strong><span>Outstanding trail elevation gain, Aisha!</span>
+                  </div>
+                </div>
+                <div class="comment-input-wrap">
+                  <input type="text" placeholder="Add a comment..." aria-label="Type comment">
+                  <button type="button">Post</button>
+                </div>
+              </div>
+            </article>
+          </div>
+
+        </div>
+
+        <!-- Sub-View 2B: Groups & Clubs Portal -->
+        <div id="view-sub-clubs" class="explore-subscreen-panel" style="display: none;">
+          
+          <!-- Club creation interface card -->
+          <article class="glass-card club-creator-form">
+            <h3>Create a Running Club</h3>
+            <p style="margin-bottom: 16px;">Set up a local group, schedule running schedules, and challenge other nearby clubs.</p>
+            <form id="group-creator-form" class="feed-uploader-form">
+              <div class="input-group">
+                <label for="club-name">Club Name</label>
+                <input type="text" id="club-name" placeholder="e.g. Bandra Sea Link Runners" required>
+              </div>
+              <div class="input-group">
+                <label for="club-location">City Location</label>
+                <input type="text" id="club-location" placeholder="e.g. Mumbai, Maharashtra" required>
+              </div>
+              <div class="input-group">
+                <label for="club-style">Running Focus</label>
+                <select id="club-style">
+                  <option value="Road Endurance">Road Endurance</option>
+                  <option value="Monsoon Trails">Monsoon Trails</option>
+                  <option value="Track Sprinting">Track Sprinting</option>
+                  <option value="Social Running">Social Running</option>
+                </select>
+              </div>
+              <div class="input-group form-full-width">
+                <label for="club-desc">Club Description</label>
+                <input type="text" id="club-desc" placeholder="A local community group of morning runners meeting up for Negative-split exercises..." required>
+              </div>
+              <div class="input-group form-full-width uploader-actions" style="margin-top: 8px;">
+                <button type="submit" class="solid-action">Assemble Club</button>
+              </div>
+            </form>
+          </article>
+
+          <!-- Group Runs Board (Scheduled runs) -->
+          <section class="group-runs-section">
+            <div class="card-heading compact">
+              <div>
+                <p class="section-kicker">Meetups Lineup</p>
+                <h3>Upcoming Group Runs</h3>
+              </div>
+            </div>
+            
+            <div id="group-runs-container">
+              <!-- Group Run 1 -->
+              <article class="group-run-card" id="grouprun-sealink">
+                <div class="group-run-info">
+                  <h4>Sunday Sunrise Sea Link Run</h4>
+                  <p class="group-run-time">Bandra West Promenade • Sunday, 6:00 AM • Road loop</p>
+                  <p>A relaxing 10k road cruise over the bridge path. Hydration check-point set up at Worli end.</p>
+                  
+                  <div class="group-run-avatars-wrap">
+                    <div class="avatar-pile">
+                      <img class="avatar-pile-img" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80" alt="Avatar">
+                      <img class="avatar-pile-img" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80" alt="Avatar">
+                      <img class="avatar-pile-img" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="Avatar">
+                    </div>
+                    <span class="avatar-pile-count" id="grouprun-count-sealink">14 runners participating</span>
+                  </div>
+                </div>
+                <div class="group-run-actions">
+                  <button class="solid-action join-group-run-btn" data-run-id="sealink" type="button">Count Me In!</button>
+                </div>
+              </article>
+
+              <!-- Group Run 2 -->
+              <article class="group-run-card" id="grouprun-sgnp">
+                <div class="group-run-info">
+                  <h4>Leopard Trail Climb Group</h4>
+                  <p class="group-run-time">SGNP Entrance • Wednesday, 5:45 AM • Trail loop</p>
+                  <p>Cadence clinic climbs and interval repeats over rocky trail loops. Recommended trail runners.</p>
+                  
+                  <div class="group-run-avatars-wrap">
+                    <div class="avatar-pile">
+                      <img class="avatar-pile-img" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80" alt="Avatar">
+                      <img class="avatar-pile-img" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="Avatar">
+                    </div>
+                    <span class="avatar-pile-count" id="grouprun-count-sgnp">8 runners participating</span>
+                  </div>
+                </div>
+                <div class="group-run-actions">
+                  <button class="solid-action join-group-run-btn" data-run-id="sgnp" type="button">Count Me In!</button>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <!-- Communities/Clubs Deck -->
+          <div class="card-heading compact" style="margin-top: 36px;">
+            <div>
+              <p class="section-kicker">Explore Communities</p>
+              <h3>Active Running Clubs</h3>
+            </div>
+          </div>
+          
+          <div class="clubs-deck" id="clubs-list-container">
+            <!-- Club 1 -->
+            <article class="club-card glass-card">
+              <div class="club-media" style="background-image: url('https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="club-body">
+                <h3>Sea Link Striders</h3>
+                <p class="club-meta-desc">Bandra coastal road runners focusing on negative split long-runs and marathon preparations.</p>
+                <div class="club-footer-stats">
+                  <span class="club-member-count">142 Members</span>
+                  <button class="ghost-action join-club-btn" data-club="striders" style="padding: 6px 12px; font-size: 0.8rem;" type="button">Join</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- Club 2 -->
+            <article class="club-card glass-card">
+              <div class="club-media" style="background-image: url('https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="club-body">
+                <h3>Western Ghats Trail Blazers</h3>
+                <p class="club-meta-desc">Lonavala-Pune trail mountaineers. We live for muddy monsoons, hill sprints, and raw nature tracks.</p>
+                <div class="club-footer-stats">
+                  <span class="club-member-count">88 Members</span>
+                  <button class="ghost-action join-club-btn" data-club="blazers" style="padding: 6px 12px; font-size: 0.8rem;" type="button">Join</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- Club 3 -->
+            <article class="club-card glass-card">
+              <div class="club-media" style="background-image: url('https://images.unsplash.com/photo-1571008887538-b36bb32f4571?auto=format&fit=crop&w=600&q=80');"></div>
+              <div class="club-body">
+                <h3>Mumbai Morning Loopers</h3>
+                <p class="club-meta-desc">Sanjay Gandhi National Park regulars. Meeting up daily at 5:30 AM near main checkpoint gate.</p>
+                <div class="club-footer-stats">
+                  <span class="club-member-count">210 Members</span>
+                  <button class="ghost-action join-club-btn" data-club="loopers" style="padding: 6px 12px; font-size: 0.8rem;" type="button">Join</button>
+                </div>
+              </div>
+            </article>
+          </div>
+
+        </div>
+
+        <!-- Sub-View 2C: Race Directory & Registrations -->
+        <div id="view-sub-races" class="explore-subscreen-panel" style="display: none;">
+          <div class="challenge-deck">
+            
+            <article class="glass-card challenge-card large">
+              <div class="challenge-visual" style="background-image: url('https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&q=80');"></div>
+              <div class="challenge-copy">
+                <span class="challenge-tag">Featured Race</span>
+                <h3>Gateway Coast 60K</h3>
+                <p>Three weekend runs along Mumbai's sweeping western coastline. Log 60km cumulative distance to earn your medal and print certificate.</p>
+                <div class="challenge-meta">
+                  <span>Jun 01 - Jun 21</span>
+                  <strong>Mumbai, IN</strong>
+                </div>
+                <button id="checkout-gateway-race" class="solid-action" style="margin-top: 16px; width: 100%;" type="button">Register (₹1,200)</button>
+              </div>
+            </article>
+
+            <article class="glass-card challenge-card">
+              <div class="challenge-visual" style="background-image: url('https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=800&q=80');"></div>
+              <div class="challenge-copy">
+                <span class="challenge-tag soft">Virtual</span>
+                <h3>5AM Club Relay</h3>
+                <p>Maintain consistent starts before sunrise. Log five 5-mile starts within 10 days to unlock custom profile tags.</p>
+                <div class="challenge-meta">
+                  <span>10 days</span>
+                  <strong>Free</strong>
+                </div>
+                <button class="ghost-action" style="margin-top: 16px; width: 100%;" type="button">Join Challenge</button>
+              </div>
+            </article>
+
+            <article class="glass-card challenge-card">
+              <div class="challenge-visual" style="background-image: url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80');"></div>
+              <div class="challenge-copy">
+                <span class="challenge-tag">Trail block</span>
+                <h3>Lonavala Camp Relay</h3>
+                <p>Steep elevation loops on mountain segments. Complete the elevation challenges to earn virtual trophies.</p>
+                <div class="challenge-meta">
+                  <span>Weekend camp</span>
+                  <strong>₹2,400</strong>
+                </div>
+                <button class="ghost-action" style="margin-top: 16px; width: 100%;" type="button">Register Camp</button>
+              </div>
+            </article>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 3: NOTES TIMELINE & EVENT JOURNAL -->
+      <section id="view-notes" class="screen">
+        <div class="screen-header notes-header">
+          <div>
+            <p class="section-kicker">Running Logs</p>
+            <h2>Expanded Journal Timeline</h2>
+          </div>
+          <p class="intro-copy" style="margin-top: 6px;">
+            Daily metrics, trail journals, and physical feedback notes indexed by calendar dates. Keep notes about your runs here!
+          </p>
+        </div>
+
+        <article class="glass-card notes-summary-card" style="margin-top: 24px;">
+          <div>
+            <p class="section-kicker" id="notes-focus-kicker">Active Entry</p>
+            <h3 id="notes-focus-title">Bridge rise</h3>
+          </div>
+          <p id="notes-focus-copy" class="daily-note-copy" style="margin-top: 10px;">Shaded climb felt controlled today. The recent run map shows the cleanest route of the challenge so far.</p>
+        </article>
+
+        <article class="glass-card notes-timeline-card">
+          <div class="card-heading compact">
+            <div>
+              <p class="section-kicker">History</p>
+              <h3>Challenge Journal Archive</h3>
+            </div>
+          </div>
+          <div id="notes-story-list" class="story-list timeline-list">
+            <!-- Story notes list drawn reactively by JS -->
+          </div>
+        </article>
+      </section>
+
+      <!-- SCREEN 4: RUNNER PROFILE & TROPHY CABINET -->
+      <section id="view-profile" class="screen">
+        <div class="screen-header">
+          <div>
+            <p class="section-kicker">Athlete Profile</p>
+            <h2>Rahul Sharma</h2>
+          </div>
+        </div>
+
+        <!-- Bio card -->
+        <article class="glass-card profile-card" style="margin-top: 24px;">
+          <div class="profile-topline">
+            <div class="profile-avatar-large">
+              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80" alt="Runner profile">
             </div>
             <div>
-              <h3 style="margin-bottom: 0.25rem;">Weekly Goal</h3>
-              <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4;">You are 12.5km away from hitting your 55km weekly target. Keep pushing!</p>
+              <h3>Rahul Sharma</h3>
+              <p style="margin-top: 4px;">Morning runner • Negative-split believer • SGNP regular route collector.</p>
             </div>
           </div>
-        </div>
-
-        <div class="section-title" style="margin-top: 2rem;">
-          <span>Active Challenge</span>
-        </div>
-
-        <div class="glass-card featured-challenge">
-          <div class="fc-image">
-            <div class="fc-overlay"></div>
-          </div>
-          <div class="fc-content">
-            <span class="tag">Virtual Event</span>
-            <h3 style="font-size: 1.4rem; margin: 0.5rem 0;">Monsoon 100K</h3>
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1rem;">
-              <div>
-                <span style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">85.0</span>
-                <span style="color: var(--text-muted); font-size: 0.85rem;"> / 100 km</span>
-              </div>
-              <span style="font-size: 0.85rem; color: var(--text-muted);">15km left</span>
+          <div class="profile-stats">
+            <div>
+              <span>Distance YTD</span>
+              <strong id="profile-total-distance">1,284 km</strong>
             </div>
-            <div class="progress-bar-bg">
-              <div class="progress-bar-fill" style="width: 85%;"></div>
+            <div>
+              <span>Starts YTD</span>
+              <strong id="profile-starts">148</strong>
+            </div>
+            <div>
+              <span>Trophies Earned</span>
+              <strong>12</strong>
             </div>
           </div>
-        </div>
-      </div>
+        </article>
 
-      <!-- SCREEN 2: CHALLENGES & DISCOVERY -->
-      <div id="view-challenges" class="screen">
-        <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem;">Discover</h2>
-        
-        <div class="filter-tabs">
-          <div class="tab active">Upcoming Races</div>
-          <div class="tab">Virtual Challenges</div>
-          <div class="tab">Training Camps</div>
-        </div>
-
-        <div class="challenge-list">
-          <!-- Item 1 -->
-          <div class="glass-card challenge-row" style="padding: 0; margin-bottom: 0;">
-            <div class="cr-image" style="background-image: url('https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&w=400&q=80');"></div>
-            <div class="cr-content">
-              <div>
-                <span class="tag">Live Race • Mumbai</span>
-                <h4 style="font-size: 1.1rem;">Mumbai Half Marathon</h4>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Oct 12, 2026</span>
-                <span style="color: var(--primary); font-weight: 700; font-size: 0.9rem;">₹1,500</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Item 2 -->
-          <div class="glass-card challenge-row" style="padding: 0; margin-bottom: 0;">
-            <div class="cr-image" style="background-image: url('https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=400&q=80');"></div>
-            <div class="cr-content">
-              <div>
-                <span class="tag" style="background: rgba(0, 229, 115, 0.15); color: var(--primary);">Virtual</span>
-                <h4 style="font-size: 1.1rem;">Diwali 50K Dash</h4>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Nov 1 - Nov 15</span>
-                <span style="color: var(--primary); font-weight: 700; font-size: 0.9rem;">Free</span>
-              </div>
-            </div>
-          </div>
+        <!-- Profile Grids -->
+        <div class="profile-grid">
           
-          <!-- Item 3 -->
-          <div class="glass-card challenge-row" style="padding: 0; margin-bottom: 0;">
-            <div class="cr-image" style="background-image: url('https://images.unsplash.com/photo-1571008887538-b36bb32f4571?auto=format&fit=crop&w=400&q=80');"></div>
-            <div class="cr-content">
+          <!-- Month calendar rhythm -->
+          <article class="glass-card">
+            <div class="card-heading compact">
               <div>
-                <span class="tag">Live Race • Delhi</span>
-                <h4 style="font-size: 1.1rem;">Delhi Night Run 10K</h4>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Dec 05, 2026</span>
-                <span style="color: var(--primary); font-weight: 700; font-size: 0.9rem;">₹800</span>
+                <p class="section-kicker">Activity Streaks</p>
+                <h3>May Consistency Rhythm</h3>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SCREEN 3: "ME" (PROFILE & TROPHY ROOM) -->
-      <div id="view-me" class="screen">
-        <div class="profile-header">
-          <div class="ph-avatar">
-            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80" alt="Profile Large">
-          </div>
-          <div class="ph-name text-gradient">Rahul Sharma</div>
-          <div class="rank-badge">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-            Global Rank: #4,201
-          </div>
-        </div>
-
-        <div class="hero-stats">
-          <div class="stat-box" style="text-align: center;">
-            <span class="stat-value text-gradient" style="font-size: 1.5rem;">1,240</span>
-            <span class="stat-label">Total KM</span>
-          </div>
-          <div class="stat-box" style="text-align: center;">
-            <span class="stat-value text-gradient" style="font-size: 1.5rem; background: linear-gradient(135deg, #00B4D8, #48CAE4); -webkit-background-clip: text;">12</span>
-            <span class="stat-label">Events</span>
-          </div>
-        </div>
-
-        <button class="btn-strava">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"></path></svg>
-          Sync with Strava
-        </button>
-
-        <div class="section-title" style="margin-top: 2rem;">
-          <span>Medals Hanger</span>
-        </div>
-        
-        <div class="glass-card">
-          <div class="medals-grid">
-            <div class="medal-item">
-              <img src="https://cdn-icons-png.flaticon.com/512/3176/3176294.png" alt="Medal 1" style="filter: drop-shadow(0 5px 10px rgba(0,229,115,0.4));">
-              <span class="medal-title">Monsoon 100K</span>
+            <div class="streak-rail">
+              <span class="streak-day active" title="Active"></span>
+              <span class="streak-day active" title="Active"></span>
+              <span class="streak-day active" title="Active"></span>
+              <span class="streak-day" title="Rest"></span>
+              <span class="streak-day active" title="Active"></span>
+              <span class="streak-day active" title="Active"></span>
+              <span class="streak-day active" title="Active"></span>
             </div>
-            <div class="medal-item">
-              <img src="https://cdn-icons-png.flaticon.com/512/3176/3176294.png" alt="Medal 2" style="filter: hue-rotate(200deg) drop-shadow(0 5px 10px rgba(0,180,216,0.4));">
-              <span class="medal-title">Speed Demon</span>
-            </div>
-            <div class="medal-item">
-              <img src="https://cdn-icons-png.flaticon.com/512/3176/3176294.png" alt="Medal 3" style="filter: hue-rotate(45deg) drop-shadow(0 5px 10px rgba(255,215,0,0.4));">
-              <span class="medal-title">Early Bird</span>
-            </div>
-          </div>
-        </div>
+            <p class="support-copy" style="margin-top: 14px; color: var(--text-muted); font-size: 0.88rem;">Your strongest rhythm is Tuesday to Thursday. Keep up the negative split pacing schedule!</p>
+          </article>
 
-        <div class="section-title" style="margin-top: 2rem;">
-          <span>Recent Activities</span>
-        </div>
-        
-        <div class="glass-card">
-          <div class="activity-item">
-            <div style="display: flex; align-items: center;">
-              <div class="ai-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              </div>
+          <!-- Badges Trophy Cabinet -->
+          <article class="glass-card">
+            <div class="card-heading compact">
               <div>
-                <div style="font-weight: 600;">Morning Run</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">Today • AI Approved</div>
+                <p class="section-kicker">Achievement Locker</p>
+                <h3>Earned Badges</h3>
               </div>
             </div>
-            <div style="text-align: right;">
-              <div style="font-weight: 700; color: var(--primary);">8.5 km</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">45:20</div>
+            <div class="badge-grid">
+              <div class="badge-card" id="badge-first-light">
+                <span class="badge-orb"></span>
+                <strong>First Light</strong>
+              </div>
+              <div class="badge-card" id="badge-hill-steady">
+                <span class="badge-orb warm"></span>
+                <strong>Hill Steady</strong>
+              </div>
+              <div class="badge-card" id="badge-lock-in">
+                <span class="badge-orb soft"></span>
+                <strong>14d Lock-in</strong>
+              </div>
             </div>
-          </div>
+          </article>
           
-          <div class="activity-item">
-            <div style="display: flex; align-items: center;">
-              <div class="ai-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              </div>
-              <div>
-                <div style="font-weight: 600;">Tempo Run</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">Yesterday • AI Approved</div>
-              </div>
-            </div>
-            <div style="text-align: right;">
-              <div style="font-weight: 700; color: var(--primary);">5.0 km</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">24:10</div>
-            </div>
-          </div>
         </div>
-
-      </div>
+      </section>
 
     </main>
 
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-      <div class="nav-item active" onclick="switchView('view-home', this)">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span>Home</span>
-      </div>
-      <div class="nav-item" onclick="switchView('view-challenges', this)">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-        <span>Discover</span>
-      </div>
-      <div class="nav-item" onclick="switchView('view-me', this)">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        <span>Me</span>
-      </div>
+    <!-- SCREEN navigation bar (Bottom nav shell) -->
+    <nav class="bottom-nav" aria-label="Primary Navigation">
+      <button class="nav-item active" type="button" data-view="view-home">
+        <span>Today</span>
+      </button>
+      <button class="nav-item" type="button" data-view="view-explore">
+        <span>Explore</span>
+      </button>
+      <button class="nav-item" type="button" data-view="view-notes">
+        <span>Notes</span>
+      </button>
+      <button class="nav-item" type="button" data-view="view-profile">
+        <span>Profile</span>
+      </button>
     </nav>
-
   </div>
 
+  <!-- OVERLAY MODAL 1: WEARABLE SYNC CENTRAL -->
+  <div class="sync-modal-overlay" id="wearable-sync-modal" aria-hidden="true">
+    <div class="sync-modal-card">
+      <button class="cert-close" id="close-sync-modal" aria-label="Close Sync Modal">&times;</button>
+      <h2>Wearable Control Room</h2>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">Pair your Garmin Connect or Strava athlete profile to sync GPS records directly into RunZap.</p>
+      
+      <div class="sync-options-grid">
+        <!-- Garmin Sync -->
+        <div class="sync-provider-card" id="provider-garmin" data-provider="garmin">
+          <div class="sync-provider-logo">Garmin</div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px;">Sync body metrics, shoe odometers, and active routes.</p>
+          <span class="sync-provider-status" id="status-text-garmin">Connected</span>
+        </div>
+        
+        <!-- Strava Sync -->
+        <div class="sync-provider-card" id="provider-strava" data-provider="strava">
+          <div class="sync-provider-logo">Strava</div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px;">Sync social feed running routes and public group events.</p>
+          <span class="sync-provider-status" id="status-text-strava">Connected</span>
+        </div>
+      </div>
+      
+      <!-- Sync Progress loading bar -->
+      <div class="sync-progress-bar-wrap" id="sync-progress-bar">
+        <div class="sync-progress-label">
+          <span id="sync-progress-status">Fetching Garmin GPS routes...</span>
+          <span id="sync-progress-percent">0%</span>
+        </div>
+        <div class="sync-progress-track">
+          <div class="sync-progress-fill" id="sync-progress-fill"></div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+        <button class="solid-action" id="trigger-sync-procedure" style="padding: 10px 24px;" type="button">Connect & Sync Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY MODAL 2: BADGE / CERTIFICATE PREVIEW -->
+  <div class="certificate-preview-overlay" id="certificate-preview" aria-hidden="true">
+    <div class="certificate-card">
+      <button class="cert-close" id="close-cert-modal" aria-label="Close Certificate Modal">&times;</button>
+      <div class="cert-logo">RunZap</div>
+      <div class="cert-kicker">Official Completion Award</div>
+      <div class="cert-divider"></div>
+      <div class="cert-title" id="cert-challenge-title">Leopard Trail block</div>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 6px;">Awarded proudly to</p>
+      <div class="cert-name">Rahul Sharma</div>
+      <p id="cert-challenge-desc" class="cert-copy">For completing the Sanjay Gandhi National Park 100km cumulative distance challenge within the target 14-day training block.</p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="solid-action" id="export-cert-pdf" style="padding: 10px 24px;" type="button">Download PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Alert Notifications Container -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="script.js"></script>
 </body>
 </html>
